@@ -44,17 +44,9 @@ jobs:
             sleep 2
           done
 
-- name: Setup database
-  run: |
-    psql postgresql://postgres:postgres@localhost:5432/crm <<EOF
-CREATE TABLE IF NOT EXISTS users (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(150) NOT NULL UNIQUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-INSERT INTO users (name, email) VALUES ('Alice','alice@example.com');
-EOF
+      - name: Setup database
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/crm -f db/init.sql
 
       - name: Run tests
         env:
