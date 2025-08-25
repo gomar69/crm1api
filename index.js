@@ -1,18 +1,16 @@
-require('dotenv').config(); // HARUS di baris paling atas
-
+require('dotenv').config(); // paling atas
 const express = require('express');
 const app = express();
-const pool = require('./db'); // pool sekarang pakai process.env
+const pool = require('./db'); // pakai process.env
 
 app.use(express.json());
 
-// endpoint /users
 app.get('/users', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users');
-    res.json({ success: true, users: result.rows, success: true });
+    res.json({ success: true, users: result.rows });
   } catch (err) {
-    console.error('DB error:', err); // penting untuk debugging
+    console.error('DB error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
