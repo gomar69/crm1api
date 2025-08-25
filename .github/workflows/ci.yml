@@ -10,7 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # PostgreSQL service container untuk test
     services:
       postgres:
         image: postgres:16
@@ -38,25 +37,32 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Wait for Postgres to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
       - name: Setup database
         run: |
-          psql postgresql://postgres:12345@localhost:5432/crm <<EOF
-          CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            email VARCHAR(150) NOT NULL UNIQUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          );
-          INSERT INTO users (name, email) VALUES ('Alice','alice@example.com');
+          psql postgresql://postgres:postgres@localhost:5432/crm <<EOF
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO users (name, email) VALUES ('Alice','alice@example.com');
 EOF
 
       - name: Run tests
-        env:  # pakai secrets agar aman jika mau ganti DB real
+        env:
           DB_HOST: localhost
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: crm
         run: npm test
 
       - name: Build Docker image
