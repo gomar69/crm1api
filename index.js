@@ -1,8 +1,7 @@
-require('dotenv').config(); // paling atas
-const express = require('express');
-const app = express();
-const pool = require('./db'); // pakai process.env
+import express from 'express';
+import pool from './db.js';
 
+const app = express();
 app.use(express.json());
 
 app.get('/users', async (req, res) => {
@@ -15,4 +14,6 @@ app.get('/users', async (req, res) => {
   }
 });
 
-module.exports = app;
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on port ${process.env.PORT || 3000}`);
+});
